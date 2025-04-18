@@ -54,23 +54,21 @@ class _EditEventScreenState extends State<EditEventScreen> {
       );
 
       if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Invalid Time'),
-          content: const Text('End time must be after start time.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    _formKey.currentState!.save();
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Invalid Time'),
+            content: const Text('End time must be after start time.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
 
       Provider.of<EventProvider>(context, listen: false).updateEvent(
         id: widget.event.id,
@@ -124,23 +122,23 @@ class _EditEventScreenState extends State<EditEventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-            title: const Text('Edit Event',style: const TextStyle(color: Colors.white)),
-            centerTitle: true,
-            backgroundColor: Color(0xFF030052),
-            elevation: 1,
-            iconTheme: const IconThemeData(color: Colors.white), //
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.remove_red_eye_outlined),
-                color:Colors.white,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const TimeTableScreen()),
-                  );
-                },
-              )
-            ],
-          ),
+        title: const Text('Edit Event', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF030052),
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.remove_red_eye_outlined),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const TimeTableScreen()),
+              );
+            },
+          )
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -205,58 +203,83 @@ class _EditEventScreenState extends State<EditEventScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 24),
+
+              // ⚠️ Battery Optimization Warning
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.yellow[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_outlined, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '🔋 Tip: To ensure accurate reminders, please disable Battery Optimization for this app in your device settings.',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               ElevatedButton(
                 onPressed: _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 5, 0, 137), // Color for the button background
+                  backgroundColor: const Color.fromARGB(255, 5, 0, 137),
                 ),
                 child: const Text(
                   'Update',
                   style: TextStyle(color: Colors.white),
                 ),
               ),
-              
+
               const SizedBox(height: 12),
               ElevatedButton(
                 onPressed: () {
                   showDialog(
-                      context: context,
-                      builder: (ctx) => AlertDialog(
+                    context: context,
+                    builder: (ctx) => AlertDialog(
                       title: const Text('Confirm Deletion'),
-                      content: const Text(
-                            'Are you sure you want to delete this event?'),
+                      content: const Text('Are you sure you want to delete this event?'),
                       actions: [
-                          TextButton(
-                            onPressed: () => Navigator.of(ctx).pop(),
-                            child: const Text('Cancel'),
+                        TextButton(
+                          onPressed: () => Navigator.of(ctx).pop(),
+                          child: const Text('Cancel'),
                         ),
                         TextButton(
                           onPressed: () {
-                              Navigator.of(ctx).pop(); // Close the dialog
-                              Provider.of<EventProvider>(context, listen: false)
+                            Navigator.of(ctx).pop();
+                            Provider.of<EventProvider>(context, listen: false)
                                 .deleteEvent(widget.event.id);
-                              ScaffoldMessenger.of(context).showSnackBar(
+                            ScaffoldMessenger.of(context).showSnackBar(
                               const SnackBar(
-                                 content: Text('Event deleted'),
-                                  duration: Duration(seconds: 2),
-                                ),
-                              );
-                        },
+                                content: Text('Event deleted'),
+                                duration: Duration(seconds: 2),
+                              ),
+                            );
+                          },
                           child: const Text(
-                              'Delete',style: TextStyle(color: Colors.red), // Color for the "Delete" action in the dialog
-                                ),
+                            'Delete',
+                            style: TextStyle(color: Colors.red),
                           ),
-                        ],
-                      ),
-                    );
-                  },
+                        ),
+                      ],
+                    ),
+                  );
+                },
                 style: ElevatedButton.styleFrom(
                   backgroundColor: Colors.red,
                 ),
                 child: const Text(
                   'Delete',
-                  style: TextStyle(color: Colors.white), // White color for the button text
+                  style: TextStyle(color: Colors.white),
                 ),
               ),
             ],
