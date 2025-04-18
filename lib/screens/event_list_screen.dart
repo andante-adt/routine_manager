@@ -4,16 +4,55 @@ import '../providers/event_provider.dart';
 import '../models/event.dart';
 import 'edit_event_screen.dart';
 import 'add_event_screen.dart';
+import 'time_table_screen.dart';
 
 class EventListScreen extends StatelessWidget {
   const EventListScreen({super.key});
+
+  Color getDayColor(DateTime date) {
+    switch (date.weekday) {
+      case DateTime.monday:
+        return Colors.yellow;
+      case DateTime.tuesday:
+        return Colors.purple;
+      case DateTime.wednesday:
+        return Colors.green;
+      case DateTime.thursday:
+        return Colors.orange;
+      case DateTime.friday:
+        return Colors.blue;
+      case DateTime.saturday:
+        return Colors.deepPurple;
+      case DateTime.sunday:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
     final events = Provider.of<EventProvider>(context).events;
 
     return Scaffold(
-      appBar: AppBar(title: const Text('All Events')),
+      appBar: AppBar(
+        title: const Text('Routine Manager', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF030052),
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.remove_red_eye_outlined),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const TimeTableScreen()),
+              );
+            },
+          )
+        ],
+      ),
       body: events.isEmpty
           ? const Center(
               child: Text(
@@ -27,8 +66,27 @@ class EventListScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final Event event = events[index];
                 return Card(
+                  color: const Color.fromARGB(255, 240, 240, 240),
                   child: ListTile(
-                    title: Text(event.title),
+                    title: Row(
+                      children: [
+                        Container(
+                          width: 10,
+                          height: 10,
+                          margin: const EdgeInsets.only(right: 8),
+                          decoration: BoxDecoration(
+                            shape: BoxShape.circle,
+                            color: getDayColor(event.startTime),
+                          ),
+                        ),
+                        Expanded(
+                          child: Text(
+                            event.title,
+                            style: const TextStyle(fontWeight: FontWeight.bold),
+                          ),
+                        ),
+                      ],
+                    ),
                     subtitle: Text(event.description),
                     trailing: Row(
                       mainAxisSize: MainAxisSize.min,
@@ -89,6 +147,7 @@ class EventListScreen extends StatelessWidget {
             MaterialPageRoute(builder: (_) => const AddEventScreen()),
           );
         },
+        backgroundColor: Colors.cyan,
         child: const Icon(Icons.add),
       ),
     );

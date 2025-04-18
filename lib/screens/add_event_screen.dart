@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/event_provider.dart';
+import 'time_table_screen.dart';
 
 class AddEventScreen extends StatefulWidget {
   const AddEventScreen({super.key});
@@ -40,6 +41,25 @@ class _AddEventScreenState extends State<AddEventScreen> {
         _endTime!.minute,
       );
 
+      if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Invalid Time'),
+          content: const Text('End time must be after start time.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    _formKey.currentState!.save();
+
       Provider.of<EventProvider>(context, listen: false).addEvent(
         title: _title,
         description: _description,
@@ -48,7 +68,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         categoryId: 'default',
       );
 
-      Navigator.of(context).pop(true); // ✅ ส่งค่า true กลับไปเพื่อ trigger refresh
+      Navigator.of(context).pop(true); 
     }
   }
 
@@ -90,7 +110,24 @@ class _AddEventScreenState extends State<AddEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Add Event')),
+      appBar: AppBar(
+            title: const Text('Add Event',style: const TextStyle(color: Colors.white)),
+            centerTitle: true,
+            backgroundColor: Color(0xFF030052),
+            elevation: 1,
+            iconTheme: const IconThemeData(color: Colors.white),
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.remove_red_eye_outlined),
+                color:Colors.white,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TimeTableScreen()),
+                  );
+                },
+              )
+            ],
+          ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -156,7 +193,13 @@ class _AddEventScreenState extends State<AddEventScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submit,
-                child: const Text('Save'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 5, 0, 137), // Color for the button background
+                ),
+                child: const Text(
+                  'Save',
+                  style: TextStyle(color: Colors.white),
+                ),
               ),
             ],
           ),

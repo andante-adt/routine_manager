@@ -64,4 +64,31 @@ class NotificationService {
       ),
     );
   }
+
+  /// 🆕 Schedule multiple reminders: 1hr, 30m, 10m, and exact time
+  static Future<void> scheduleMultipleNotifications({
+    required String title,
+    required String body,
+    required DateTime eventTime,
+    required int baseId,
+  }) async {
+    final reminderTimes = [
+      eventTime.subtract(const Duration(hours: 1)),
+      eventTime.subtract(const Duration(minutes: 30)),
+      eventTime.subtract(const Duration(minutes: 10)),
+      eventTime,
+    ];
+
+    for (int i = 0; i < reminderTimes.length; i++) {
+      final reminderTime = reminderTimes[i];
+      if (reminderTime.isAfter(DateTime.now())) {
+        await scheduleNotification(
+          id: baseId + i,
+          title: title,
+          body: body,
+          scheduledTime: reminderTime,
+        );
+      }
+    }
+  }
 }

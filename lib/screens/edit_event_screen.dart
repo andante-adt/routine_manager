@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/event.dart';
 import '../providers/event_provider.dart';
+import 'time_table_screen.dart';
 
 class EditEventScreen extends StatefulWidget {
   final Event event;
@@ -51,6 +52,25 @@ class _EditEventScreenState extends State<EditEventScreen> {
         _endTime!.hour,
         _endTime!.minute,
       );
+
+      if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
+      showDialog(
+        context: context,
+        builder: (_) => AlertDialog(
+          title: const Text('Invalid Time'),
+          content: const Text('End time must be after start time.'),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(),
+              child: const Text('OK'),
+            ),
+          ],
+        ),
+      );
+      return;
+    }
+
+    _formKey.currentState!.save();
 
       Provider.of<EventProvider>(context, listen: false).updateEvent(
         id: widget.event.id,
@@ -103,7 +123,24 @@ class _EditEventScreenState extends State<EditEventScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Edit Event')),
+      appBar: AppBar(
+            title: const Text('Edit Event',style: const TextStyle(color: Colors.white)),
+            centerTitle: true,
+            backgroundColor: Color(0xFF030052),
+            elevation: 1,
+            iconTheme: const IconThemeData(color: Colors.white), //
+            actions: [
+              IconButton(
+                icon: const Icon(Icons.remove_red_eye_outlined),
+                color:Colors.white,
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const TimeTableScreen()),
+                  );
+                },
+              )
+            ],
+          ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -171,7 +208,56 @@ class _EditEventScreenState extends State<EditEventScreen> {
               const SizedBox(height: 24),
               ElevatedButton(
                 onPressed: _submit,
-                child: const Text('Update'),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Color.fromARGB(255, 5, 0, 137), // Color for the button background
+                ),
+                child: const Text(
+                  'Update',
+                  style: TextStyle(color: Colors.white),
+                ),
+              ),
+              
+              const SizedBox(height: 12),
+              ElevatedButton(
+                onPressed: () {
+                  showDialog(
+                      context: context,
+                      builder: (ctx) => AlertDialog(
+                      title: const Text('Confirm Deletion'),
+                      content: const Text(
+                            'Are you sure you want to delete this event?'),
+                      actions: [
+                          TextButton(
+                            onPressed: () => Navigator.of(ctx).pop(),
+                            child: const Text('Cancel'),
+                        ),
+                        TextButton(
+                          onPressed: () {
+                              Navigator.of(ctx).pop(); // Close the dialog
+                              Provider.of<EventProvider>(context, listen: false)
+                                .deleteEvent(widget.event.id);
+                              ScaffoldMessenger.of(context).showSnackBar(
+                              const SnackBar(
+                                 content: Text('Event deleted'),
+                                  duration: Duration(seconds: 2),
+                                ),
+                              );
+                        },
+                          child: const Text(
+                              'Delete',style: TextStyle(color: Colors.red), // Color for the "Delete" action in the dialog
+                                ),
+                          ),
+                        ],
+                      ),
+                    );
+                  },
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.red,
+                ),
+                child: const Text(
+                  'Delete',
+                  style: TextStyle(color: Colors.white), // White color for the button text
+                ),
               ),
             ],
           ),
