@@ -9,6 +9,27 @@ class TimeTableScreen extends StatelessWidget {
   static const double hourHeight = 60.0;
   static const double columnWidth = 48.0;
 
+  Color getDayColor(DateTime date) {
+    switch (date.weekday) {
+      case DateTime.sunday:
+        return Colors.red;
+      case DateTime.monday:
+        return Colors.yellow;
+      case DateTime.tuesday:
+        return Colors.purple;
+      case DateTime.wednesday:
+        return Colors.green;
+      case DateTime.thursday:
+        return Colors.orange;
+      case DateTime.friday:
+        return Colors.blue;
+      case DateTime.saturday:
+        return Colors.deepPurple;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     final events = Provider.of<EventProvider>(context).events;
@@ -47,48 +68,46 @@ class TimeTableScreen extends StatelessWidget {
                 children: [
                   const SizedBox(width: 40),
                   ...['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].asMap().entries
-                  .map(
-                    (entry) {
-                      Color dayColor;
-                      switch (entry.key) {
-                        case 1: // Monday
+                      .map((entry) {
+                    Color dayColor;
+                    switch (entry.key) {
+                      case 1:
                         dayColor = Colors.yellow;
                         break;
-                        case 2: // Tuesday
+                      case 2:
                         dayColor = Colors.purple;
                         break;
-                        case 3: // Wednesday
+                      case 3:
                         dayColor = Colors.green;
                         break;
-                        case 4: // Thursday
+                      case 4:
                         dayColor = Colors.orange;
                         break;
-                        case 5: // Friday
+                      case 5:
                         dayColor = Colors.blue;
                         break;
-                        case 6: // Saturday
+                      case 6:
                         dayColor = Colors.deepPurple;
                         break;
-                        case 0: // Sunday
-                        default:
+                      case 0:
+                      default:
                         dayColor = Colors.red;
                         break;
-                        }
-                        return Container(
-                          width: columnWidth,
-                          height: 40,
-                          color: dayColor,
-                          alignment: Alignment.center,
-                          child: Text(
-                            entry.value,
-                            style: const TextStyle(
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                          ),
+                    }
+                    return Container(
+                      width: columnWidth,
+                      height: 40,
+                      color: dayColor,
+                      alignment: Alignment.center,
+                      child: Text(
+                        entry.value,
+                        style: const TextStyle(
+                          fontWeight: FontWeight.bold,
+                          color: Colors.white,
                         ),
-                      );
-                    },
-                  ),
+                      ),
+                    );
+                  }),
                 ],
               ),
 
@@ -145,18 +164,17 @@ class TimeTableScreen extends StatelessWidget {
                                   height: height,
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors
-                                          .primaries[
-                                              day % Colors.primaries.length]
-                                          .shade200,
+                                      color: getDayColor(event.startTime).withOpacity(0.7),
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     padding: const EdgeInsets.all(4),
                                     child: Text(
                                       event.title,
                                       style: const TextStyle(
-                                          fontSize: 10,
-                                          fontWeight: FontWeight.w600),
+                                        fontSize: 10,
+                                        fontWeight: FontWeight.w600,
+                                        color: Colors.white,
+                                      ),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),

@@ -20,6 +20,10 @@ class EventProvider with ChangeNotifier {
     _events.addAll(box.values);
     notifyListeners();
 
+    for (final event in _events) {
+    _cancelAllEventNotifications(event);
+    }
+
     if (_notificationsEnabled) {
       for (final event in _events) {
         if (event.isNotificationOn) {
