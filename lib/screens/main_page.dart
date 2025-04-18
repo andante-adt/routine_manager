@@ -307,6 +307,7 @@ class _MainPageState extends State<MainPage> {
                           final time =
                               '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}';
                           return Card(
+                            color: const Color.fromARGB(255, 240, 240, 240),
                             elevation: 2,
                             margin: const EdgeInsets.symmetric(vertical: 8),
                             child: ListTile(
@@ -326,6 +327,8 @@ class _MainPageState extends State<MainPage> {
                                 onChanged: (val) {
                                   eventProvider.toggleNotification(event.id, val);
                                 },
+                                activeTrackColor: Colors.blue,
+                                inactiveTrackColor: const Color.fromARGB(255, 240, 240, 240),
                               ),
                             ),
                           );

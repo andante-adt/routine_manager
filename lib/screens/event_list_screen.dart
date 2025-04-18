@@ -66,6 +66,7 @@ class EventListScreen extends StatelessWidget {
               itemBuilder: (context, index) {
                 final Event event = events[index];
                 return Card(
+                  color: const Color.fromARGB(255, 240, 240, 240),
                   child: ListTile(
                     title: Row(
                       children: [
