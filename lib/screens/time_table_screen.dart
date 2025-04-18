@@ -46,26 +46,49 @@ class TimeTableScreen extends StatelessWidget {
               Row(
                 children: [
                   const SizedBox(width: 40),
-                  ...['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
-                      .asMap()
-                      .entries
-                      .map(
-                        (entry) => Container(
+                  ...['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].asMap().entries
+                  .map(
+                    (entry) {
+                      Color dayColor;
+                      switch (entry.key) {
+                        case 1: // Monday
+                        dayColor = Colors.yellow;
+                        break;
+                        case 2: // Tuesday
+                        dayColor = Colors.purple;
+                        break;
+                        case 3: // Wednesday
+                        dayColor = Colors.green;
+                        break;
+                        case 4: // Thursday
+                        dayColor = Colors.orange;
+                        break;
+                        case 5: // Friday
+                        dayColor = Colors.blue;
+                        break;
+                        case 6: // Saturday
+                        dayColor = Colors.deepPurple;
+                        break;
+                        case 0: // Sunday
+                        default:
+                        dayColor = Colors.red;
+                        break;
+                        }
+                        return Container(
                           width: columnWidth,
                           height: 40,
-                          color: Colors
-                              .primaries[entry.key % Colors.primaries.length]
-                              .shade300,
+                          color: dayColor,
                           alignment: Alignment.center,
                           child: Text(
                             entry.value,
                             style: const TextStyle(
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
-                            ),
                           ),
                         ),
-                      )
+                      );
+                    },
+                  ),
                 ],
               ),
 
