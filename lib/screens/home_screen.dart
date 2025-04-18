@@ -28,7 +28,8 @@ class HomeScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey[400]),
+                    Icon(Icons.calendar_today_outlined,
+                        size: 64, color: Colors.grey[400]),
                     const SizedBox(height: 16),
                     Text(
                       'No events yet.',
@@ -42,7 +43,8 @@ class HomeScreen extends StatelessWidget {
                 itemCount: events.length,
                 itemBuilder: (ctx, i) {
                   final event = events[i];
-                  final timeText = '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}';
+                  final timeText =
+                      '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}';
 
                   return Card(
                     elevation: 4,
@@ -56,7 +58,7 @@ class HomeScreen extends StatelessWidget {
                       child: Row(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          const Icon(Icons.event, color: Colors.teal, size: 28),
+                          const Icon(Icons.event, color: Colors.cyan, size: 28),
                           const SizedBox(width: 12),
                           Expanded(
                             child: Column(
@@ -64,17 +66,21 @@ class HomeScreen extends StatelessWidget {
                               children: [
                                 Text(
                                   event.title,
-                                  style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                                  style: const TextStyle(
+                                      fontSize: 18,
+                                      fontWeight: FontWeight.bold),
                                 ),
                                 const SizedBox(height: 4),
                                 Text(
                                   event.description,
-                                  style: const TextStyle(fontSize: 14, color: Colors.black54),
+                                  style: const TextStyle(
+                                      fontSize: 14, color: Colors.black54),
                                 ),
                                 const SizedBox(height: 6),
                                 Text(
                                   timeText,
-                                  style: const TextStyle(fontSize: 13, color: Colors.black45),
+                                  style: const TextStyle(
+                                      fontSize: 13, color: Colors.black45),
                                 ),
                               ],
                             ),
@@ -83,19 +89,23 @@ class HomeScreen extends StatelessWidget {
                           Column(
                             children: [
                               IconButton(
-                                icon: const Icon(Icons.edit, color: Colors.blueAccent),
+                                icon: const Icon(Icons.edit,
+                                    color: Colors.blueAccent),
                                 onPressed: () {
                                   Navigator.of(context).push(
                                     MaterialPageRoute(
-                                      builder: (_) => EditEventScreen(event: event),
+                                      builder: (_) =>
+                                          EditEventScreen(event: event),
                                     ),
                                   );
                                 },
                               ),
                               IconButton(
-                                icon: const Icon(Icons.delete, color: Colors.redAccent),
+                                icon: const Icon(Icons.delete,
+                                    color: Colors.redAccent),
                                 onPressed: () {
-                                  Provider.of<EventProvider>(context, listen: false)
+                                  Provider.of<EventProvider>(context,
+                                          listen: false)
                                       .deleteEvent(event.id);
                                 },
                               ),
@@ -112,7 +122,9 @@ class HomeScreen extends StatelessWidget {
         onPressed: () {
           Navigator.of(context).push(
             MaterialPageRoute(builder: (_) => const AddEventScreen()),
-          );
+          ).then((value) {
+            if (value = true) {}
+          });
         },
         child: const Icon(Icons.add),
       ),

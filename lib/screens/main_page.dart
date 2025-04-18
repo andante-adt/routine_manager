@@ -7,6 +7,7 @@ import 'dart:convert';
 import '../providers/event_provider.dart';
 import '../models/event.dart';
 import 'time_table_screen.dart';
+import 'weather_forecast_screen.dart';
 
 class MainPage extends StatefulWidget {
   const MainPage({super.key});
@@ -21,6 +22,7 @@ class _MainPageState extends State<MainPage> {
   String _selectedLocation = 'Salaya';
   String _temperature = '';
   String _condition = '';
+  String _icon = '';
   bool _isLoadingWeather = false;
 
   @override
@@ -42,6 +44,7 @@ class _MainPageState extends State<MainPage> {
         setState(() {
           _temperature = '${data['current']['temp_c']}°C';
           _condition = data['current']['condition']['text'];
+          _icon = 'https:${data['current']['condition']['icon']}';
         });
       } else {
         setState(() {
@@ -85,6 +88,27 @@ class _MainPageState extends State<MainPage> {
     return DateFormat('EEEE').format(date);
   }
 
+  Color getDayColor(DateTime date) {
+    switch (date.weekday) {
+      case DateTime.monday:
+        return Colors.yellow;
+      case DateTime.tuesday:
+        return Colors.purple;
+      case DateTime.wednesday:
+        return Colors.green;
+      case DateTime.thursday:
+        return Colors.orange;
+      case DateTime.friday:
+        return Colors.blue;
+      case DateTime.saturday:
+        return Colors.deepPurple;
+      case DateTime.sunday:
+        return Colors.red;
+      default:
+        return Colors.grey;
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
     return Consumer<EventProvider>(
@@ -98,13 +122,14 @@ class _MainPageState extends State<MainPage> {
 
         return Scaffold(
           appBar: AppBar(
-            title: const Text('Routine Manager'),
+            title: const Text('Routine Manager', style: TextStyle(color: Colors.white)),
             centerTitle: true,
-            backgroundColor: Colors.white,
+            backgroundColor: const Color(0xFF030052),
             elevation: 1,
             actions: [
               IconButton(
                 icon: const Icon(Icons.remove_red_eye_outlined),
+                color: Colors.white,
                 onPressed: () {
                   Navigator.of(context).push(
                     MaterialPageRoute(builder: (_) => const TimeTableScreen()),
@@ -113,10 +138,11 @@ class _MainPageState extends State<MainPage> {
               )
             ],
           ),
+          backgroundColor: const Color(0xFF384584),
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // 🔍 Search Bar
+              // Search Bar
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
@@ -149,85 +175,163 @@ class _MainPageState extends State<MainPage> {
                   ],
                 ),
               ),
+
               if (_searchResults.isNotEmpty)
                 ..._searchResults.map((location) {
-                  return ListTile(
-                    title: Text(location),
-                    onTap: () {
-                      _selectedLocation = location;
-                      _searchController.text = location;
-                      _searchResults.clear();
-                      _fetchWeather(location);
-                    },
-                  );
-                }),
-
-              const SizedBox(height: 24),
-
-              // 🌤 Weather Info
-              Center(
-                child: _isLoadingWeather
-                    ? const CircularProgressIndicator()
-                    : Column(
-                        children: [
-                          Text(
-                            _selectedLocation,
-                            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
-                          ),
-                          const SizedBox(height: 12),
-                          Text(
-                            _temperature,
-                            style: const TextStyle(fontSize: 32),
-                          ),
-                          Text(
-                            _condition,
-                            style: const TextStyle(color: Colors.grey),
-                          ),
-                        ],
-                      ),
-              ),
-
-              const SizedBox(height: 32),
-
-              // 🗓️ Day Label
-              Text(
-                _getDayLabel(today),
-                style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold),
-              ),
-              const SizedBox(height: 16),
-
-              // 📅 Event List
-              if (eventsToday.isEmpty)
-                const Center(
-                  child: Column(
-                    children: [
-                      Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey),
-                      SizedBox(height: 16),
-                      Text('No events for today.'),
-                    ],
-                  ),
-                )
-              else
-                ...eventsToday.map((event) {
-                  final time = '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}';
-                  return Card(
-                    elevation: 2,
-                    margin: const EdgeInsets.symmetric(vertical: 8),
-                    child: ListTile(
-                      title: Text(
-                        time,
-                        style: const TextStyle(fontWeight: FontWeight.bold),
-                      ),
-                      subtitle: Text(event.title),
-                      trailing: Switch(
-                        value: event.isNotificationOn,
-                        onChanged: (val) {
-                          eventProvider.toggleNotification(event.id, val);
+                  return Container(
+                    decoration: BoxDecoration(color: Colors.grey.shade100),
+                    margin: const EdgeInsets.symmetric(horizontal: 30.0),
+                    child: Padding(
+                      padding: const EdgeInsets.symmetric(horizontal: 30.0),
+                      child: ListTile(
+                        title: Text(location),
+                        onTap: () {
+                          _selectedLocation = location;
+                          _searchController.text = location;
+                          _searchResults.clear();
+                          _fetchWeather(location);
                         },
                       ),
                     ),
                   );
                 }),
+
+              const SizedBox(height: 24),
+
+              // Weather Info with tap
+              Center(
+                child: _isLoadingWeather
+                    ? const CircularProgressIndicator()
+                    : GestureDetector(
+                        onTap: () {
+                          Navigator.of(context).push(
+                            MaterialPageRoute(
+                              builder: (_) => WeatherForecastScreen(location: _selectedLocation),
+                            ),
+                          );
+                        },
+                        child: Container(
+                          width: double.infinity,
+                          padding: EdgeInsets.all(MediaQuery.of(context).size.width > 600 ? 24 : 16),
+                          margin: const EdgeInsets.symmetric(horizontal: 16),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(30),
+                          ),
+                          child: Column(
+                            children: [
+                              Text(
+                                _selectedLocation,
+                                style: const TextStyle(
+                                  fontSize: 24,
+                                  fontWeight: FontWeight.bold,
+                                  color: Colors.black,
+                                ),
+                              ),
+                              const SizedBox(height: 12),
+                              Image.network(
+                                _icon,
+                                height: 64,
+                                width: 64,
+                                errorBuilder: (context, error, stackTrace) {
+                                  return const Icon(Icons.broken_image, color: Colors.black);
+                                },
+                              ),
+                              Text(
+                                _temperature,
+                                style: const TextStyle(fontSize: 32, color: Colors.black),
+                              ),
+                              Text(
+                                _condition,
+                                style: const TextStyle(color: Colors.black),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ),
+              ),
+
+              const SizedBox(height: 32),
+
+              // Day Label
+              Center(
+                child: Container(
+                  width: double.infinity,
+                  decoration: const BoxDecoration(
+                    color: Color(0xFF030052),
+                    borderRadius: BorderRadius.only(
+                      topLeft: Radius.circular(30),
+                      topRight: Radius.circular(30),
+                    ),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(vertical: 16
+                    , horizontal: 108),
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(10),
+                      ),
+                      child: Text(
+                        _getDayLabel(today),
+                        textAlign: TextAlign.center,
+                        style: const TextStyle(
+                          fontSize: 20,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.black,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              // Event List
+              Container(
+                height: MediaQuery.of(context).size.height,
+                color: Colors.white,
+                padding: const EdgeInsets.all(16),
+                child: eventsToday.isEmpty
+                    ? const Center(
+                        child: Column(
+                          children: [
+                            Icon(Icons.calendar_today_outlined, size: 64, color: Colors.grey),
+                            SizedBox(height: 16),
+                            Text('No events for today.', style: TextStyle(color: Colors.grey)),
+                          ],
+                        ),
+                      )
+                    : Column(
+                        children: eventsToday.map((event) {
+                          final time =
+                              '${DateFormat('HH:mm').format(event.startTime)} - ${DateFormat('HH:mm').format(event.endTime)}';
+                          return Card(
+                            elevation: 2,
+                            margin: const EdgeInsets.symmetric(vertical: 8),
+                            child: ListTile(
+                              leading: Container(
+                                width: 10,
+                                height: 10,
+                                margin: const EdgeInsets.only(top: 6),
+                                decoration: BoxDecoration(
+                                  shape: BoxShape.circle,
+                                  color: getDayColor(event.startTime),
+                                ),
+                              ),
+                              title: Text(time, style: const TextStyle(fontWeight: FontWeight.bold)),
+                              subtitle: Text(event.title),
+                              trailing: Switch(
+                                value: event.isNotificationOn,
+                                onChanged: (val) {
+                                  eventProvider.toggleNotification(event.id, val);
+                                },
+                              ),
+                            ),
+                          );
+                        }).toList(),
+                      ),
+              )
             ],
           ),
         );

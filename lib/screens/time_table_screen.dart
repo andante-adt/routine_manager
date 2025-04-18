@@ -22,8 +22,11 @@ class TimeTableScreen extends StatelessWidget {
 
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Time Table'),
+        title: const Text('Time Table', style: TextStyle(color: Colors.white)),
         centerTitle: true,
+        backgroundColor: const Color(0xFF030052),
+        iconTheme: const IconThemeData(color: Colors.white),
+        actionsIconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
@@ -50,7 +53,9 @@ class TimeTableScreen extends StatelessWidget {
                         (entry) => Container(
                           width: columnWidth,
                           height: 40,
-                          color: Colors.primaries[entry.key % Colors.primaries.length].shade300,
+                          color: Colors
+                              .primaries[entry.key % Colors.primaries.length]
+                              .shade300,
                           alignment: Alignment.center,
                           child: Text(
                             entry.value,
@@ -103,8 +108,12 @@ class TimeTableScreen extends StatelessWidget {
                                 final start = event.startTime;
                                 final end = event.endTime;
 
-                                final topOffset = ((start.hour + start.minute / 60.0) - 6) * hourHeight;
-                                final height = ((end.difference(start).inMinutes) / 60.0) * hourHeight;
+                                final topOffset =
+                                    ((start.hour + start.minute / 60.0) - 6) *
+                                        hourHeight;
+                                final height =
+                                    ((end.difference(start).inMinutes) / 60.0) *
+                                        hourHeight;
 
                                 return Positioned(
                                   top: topOffset,
@@ -113,13 +122,18 @@ class TimeTableScreen extends StatelessWidget {
                                   height: height,
                                   child: Container(
                                     decoration: BoxDecoration(
-                                      color: Colors.primaries[day % Colors.primaries.length].shade200,
+                                      color: Colors
+                                          .primaries[
+                                              day % Colors.primaries.length]
+                                          .shade200,
                                       borderRadius: BorderRadius.circular(6),
                                     ),
                                     padding: const EdgeInsets.all(4),
                                     child: Text(
                                       event.title,
-                                      style: const TextStyle(fontSize: 10, fontWeight: FontWeight.w600),
+                                      style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600),
                                       overflow: TextOverflow.ellipsis,
                                     ),
                                   ),
