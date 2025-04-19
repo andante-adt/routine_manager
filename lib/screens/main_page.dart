@@ -91,7 +91,7 @@ class _MainPageState extends State<MainPage> {
   Color getDayColor(DateTime date) {
     switch (date.weekday) {
       case DateTime.monday:
-        return Colors.yellow;
+        return const Color.fromARGB(255, 255, 210, 59);
       case DateTime.tuesday:
         return Colors.purple;
       case DateTime.wednesday:
