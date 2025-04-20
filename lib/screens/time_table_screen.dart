@@ -15,7 +15,7 @@ class TimeTableScreen extends StatelessWidget {
       case DateTime.sunday:
         return Colors.red;
       case DateTime.monday:
-        return Colors.yellow;
+        return const Color.fromARGB(255, 255, 210, 59);
       case DateTime.tuesday:
         return Colors.purple;
       case DateTime.wednesday:
@@ -73,7 +73,7 @@ class TimeTableScreen extends StatelessWidget {
                     Color dayColor;
                     switch (entry.key) {
                       case 1:
-                        dayColor = Colors.yellow;
+                        dayColor = const Color.fromARGB(255, 255, 210, 59);
                         break;
                       case 2:
                         dayColor = Colors.purple;
