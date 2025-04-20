@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../models/event.dart';
 import '../providers/event_provider.dart';
+import 'edit_event_screen.dart'; // ✅ เพิ่ม import
 
 class TimeTableScreen extends StatelessWidget {
   const TimeTableScreen({super.key});
@@ -14,7 +15,7 @@ class TimeTableScreen extends StatelessWidget {
       case DateTime.sunday:
         return Colors.red;
       case DateTime.monday:
-        return const Color.fromARGB(255, 255, 210, 59);
+        return Colors.yellow;
       case DateTime.tuesday:
         return Colors.purple;
       case DateTime.wednesday:
@@ -34,10 +35,9 @@ class TimeTableScreen extends StatelessWidget {
   Widget build(BuildContext context) {
     final events = Provider.of<EventProvider>(context).events;
 
-    // แยก event ตามวัน
     Map<int, List<Event>> weekMap = {for (var i = 0; i < 7; i++) i: []};
     for (final event in events) {
-      int weekday = event.startTime.weekday % 7; // Sunday = 0
+      int weekday = event.startTime.weekday % 7;
       weekMap[weekday]!.add(event);
     }
 
@@ -47,7 +47,6 @@ class TimeTableScreen extends StatelessWidget {
         centerTitle: true,
         backgroundColor: const Color(0xFF030052),
         iconTheme: const IconThemeData(color: Colors.white),
-        actionsIconTheme: const IconThemeData(color: Colors.white),
         actions: [
           IconButton(
             icon: const Icon(Icons.close),
@@ -67,12 +66,14 @@ class TimeTableScreen extends StatelessWidget {
               Row(
                 children: [
                   const SizedBox(width: 40),
-                  ...['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'].asMap().entries
+                  ...['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+                      .asMap()
+                      .entries
                       .map((entry) {
                     Color dayColor;
                     switch (entry.key) {
                       case 1:
-                        dayColor = const Color.fromARGB(255, 255, 210, 59);
+                        dayColor = Colors.yellow;
                         break;
                       case 2:
                         dayColor = Colors.purple;
@@ -162,20 +163,33 @@ class TimeTableScreen extends StatelessWidget {
                                   left: 4,
                                   right: 4,
                                   height: height,
-                                  child: Container(
-                                    decoration: BoxDecoration(
-                                      color: getDayColor(event.startTime),
-                                      borderRadius: BorderRadius.circular(6),
-                                    ),
-                                    padding: const EdgeInsets.all(4),
-                                    child: Text(
-                                      event.title,
-                                      style: const TextStyle(
-                                        fontSize: 10,
-                                        fontWeight: FontWeight.w600,
-                                        color: Colors.white,
+                                  child: GestureDetector(
+                                    onTap: () {
+                                      Navigator.of(context).push(
+                                        MaterialPageRoute(
+                                          builder: (_) =>
+                                              EditEventScreen(event: event),
+                                        ),
+                                      );
+                                    },
+                                    child: Container(
+                                      decoration: BoxDecoration(
+                                        color: getDayColor(event.startTime)
+                                            .withOpacity(0.7),
+                                        borderRadius: BorderRadius.circular(6),
                                       ),
-                                      overflow: TextOverflow.ellipsis,
+                                      padding: const EdgeInsets.all(4),
+                                      child: Text(
+                                        event.title,
+                                        style: const TextStyle(
+                                          fontSize: 10,
+                                          fontWeight: FontWeight.w600,
+                                          color: Colors.white,
+                                        ),
+                                        overflow: TextOverflow.visible,
+                                        softWrap: true,
+                                        maxLines: 3,
+                                      ),
                                     ),
                                   ),
                                 );
@@ -193,7 +207,8 @@ class TimeTableScreen extends StatelessWidget {
                         top: top,
                         left: 40,
                         right: 0,
-                        child: Divider(height: 1, color: Colors.grey.shade300),
+                        child:
+                            Divider(height: 1, color: Colors.grey.shade300),
                       );
                     }),
                   ],
