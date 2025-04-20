@@ -1,8 +1,11 @@
+// 📄 main_page.dart
+
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 import 'package:http/http.dart' as http;
 import 'dart:convert';
+import 'package:geolocator/geolocator.dart';
 
 import '../providers/event_provider.dart';
 import '../models/event.dart';
@@ -19,16 +22,56 @@ class MainPage extends StatefulWidget {
 class _MainPageState extends State<MainPage> {
   final TextEditingController _searchController = TextEditingController();
   List<String> _searchResults = [];
-  String _selectedLocation = 'Salaya';
+  String? _selectedLocation;
   String _temperature = '';
   String _condition = '';
   String _icon = '';
   bool _isLoadingWeather = false;
+  bool _hasCheckedLocation = false;
 
   @override
-  void initState() {
-    super.initState();
-    _fetchWeather(_selectedLocation);
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    if (!_hasCheckedLocation) {
+      _hasCheckedLocation = true;
+      _getCurrentLocationAndFetchWeather();
+    }
+  }
+
+  Future<void> _getCurrentLocationAndFetchWeather() async {
+    try {
+      bool serviceEnabled = await Geolocator.isLocationServiceEnabled();
+      if (!serviceEnabled) return;
+
+      LocationPermission permission = await Geolocator.checkPermission();
+      if (permission == LocationPermission.denied) {
+        permission = await Geolocator.requestPermission();
+        if (permission == LocationPermission.denied) return;
+      }
+
+      if (permission == LocationPermission.deniedForever) return;
+
+      Position position = await Geolocator.getCurrentPosition(
+        desiredAccuracy: LocationAccuracy.high,
+      );
+
+      final url = Uri.parse(
+        'http://api.weatherapi.com/v1/search.json?key=49d3d49cf23c4cef8db101513253003&q=${position.latitude},${position.longitude}',
+      );
+
+      final response = await http.get(url);
+      if (response.statusCode == 200) {
+        final List<dynamic> data = json.decode(response.body);
+        if (data.isNotEmpty) {
+          setState(() {
+            _selectedLocation = data[0]['name'];
+          });
+          _fetchWeather(_selectedLocation!);
+        }
+      }
+    } catch (_) {
+      // Ignore errors silently
+    }
   }
 
   Future<void> _fetchWeather(String location) async {
@@ -142,7 +185,7 @@ class _MainPageState extends State<MainPage> {
           body: ListView(
             padding: const EdgeInsets.all(16),
             children: [
-              // Search Bar
+              // 🔍 Search Bar
               Container(
                 padding: const EdgeInsets.symmetric(horizontal: 12),
                 decoration: BoxDecoration(
@@ -198,62 +241,63 @@ class _MainPageState extends State<MainPage> {
 
               const SizedBox(height: 24),
 
-              // Weather Info with tap
-              Center(
-                child: _isLoadingWeather
-                    ? const CircularProgressIndicator()
-                    : GestureDetector(
-                        onTap: () {
-                          Navigator.of(context).push(
-                            MaterialPageRoute(
-                              builder: (_) => WeatherForecastScreen(location: _selectedLocation),
+              // 🌤 Weather Info
+              if (_selectedLocation != null && _selectedLocation!.isNotEmpty)
+                Center(
+                  child: _isLoadingWeather
+                      ? const CircularProgressIndicator()
+                      : GestureDetector(
+                          onTap: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => WeatherForecastScreen(location: _selectedLocation!),
+                              ),
+                            );
+                          },
+                          child: Container(
+                            width: double.infinity,
+                            padding: const EdgeInsets.all(16),
+                            margin: const EdgeInsets.symmetric(horizontal: 16),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(30),
                             ),
-                          );
-                        },
-                        child: Container(
-                          width: double.infinity,
-                          padding: EdgeInsets.all(MediaQuery.of(context).size.width > 600 ? 24 : 16),
-                          margin: const EdgeInsets.symmetric(horizontal: 16),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            borderRadius: BorderRadius.circular(30),
-                          ),
-                          child: Column(
-                            children: [
-                              Text(
-                                _selectedLocation,
-                                style: const TextStyle(
-                                  fontSize: 24,
-                                  fontWeight: FontWeight.bold,
-                                  color: Colors.black,
+                            child: Column(
+                              children: [
+                                Text(
+                                  _selectedLocation!,
+                                  style: const TextStyle(
+                                    fontSize: 24,
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.black,
+                                  ),
                                 ),
-                              ),
-                              const SizedBox(height: 12),
-                              Image.network(
-                                _icon,
-                                height: 64,
-                                width: 64,
-                                errorBuilder: (context, error, stackTrace) {
-                                  return const Icon(Icons.broken_image, color: Colors.black);
-                                },
-                              ),
-                              Text(
-                                _temperature,
-                                style: const TextStyle(fontSize: 32, color: Colors.black),
-                              ),
-                              Text(
-                                _condition,
-                                style: const TextStyle(color: Colors.black),
-                              ),
-                            ],
+                                const SizedBox(height: 12),
+                                Image.network(
+                                  _icon,
+                                  height: 64,
+                                  width: 64,
+                                  errorBuilder: (context, error, stackTrace) {
+                                    return const Icon(Icons.broken_image, color: Colors.black);
+                                  },
+                                ),
+                                Text(
+                                  _temperature,
+                                  style: const TextStyle(fontSize: 32, color: Colors.black),
+                                ),
+                                Text(
+                                  _condition,
+                                  style: const TextStyle(color: Colors.black),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
-              ),
+                ),
 
               const SizedBox(height: 32),
 
-              // Day Label
+              // 📅 Day Label
               Center(
                 child: Container(
                   width: double.infinity,
@@ -265,8 +309,7 @@ class _MainPageState extends State<MainPage> {
                     ),
                   ),
                   child: Padding(
-                    padding: const EdgeInsets.symmetric(vertical: 16
-                    , horizontal: 108),
+                    padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 108),
                     child: Container(
                       padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 24),
                       decoration: BoxDecoration(
@@ -287,7 +330,7 @@ class _MainPageState extends State<MainPage> {
                 ),
               ),
 
-              // Event List
+              // 📋 Event List
               Container(
                 height: MediaQuery.of(context).size.height,
                 color: Colors.white,
