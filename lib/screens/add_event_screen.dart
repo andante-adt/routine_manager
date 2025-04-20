@@ -42,23 +42,21 @@ class _AddEventScreenState extends State<AddEventScreen> {
       );
 
       if (endDateTime.isBefore(startDateTime) || endDateTime.isAtSameMomentAs(startDateTime)) {
-      showDialog(
-        context: context,
-        builder: (_) => AlertDialog(
-          title: const Text('Invalid Time'),
-          content: const Text('End time must be after start time.'),
-          actions: [
-            TextButton(
-              onPressed: () => Navigator.of(context).pop(),
-              child: const Text('OK'),
-            ),
-          ],
-        ),
-      );
-      return;
-    }
-
-    _formKey.currentState!.save();
+        showDialog(
+          context: context,
+          builder: (_) => AlertDialog(
+            title: const Text('Invalid Time'),
+            content: const Text('End time must be after start time.'),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.of(context).pop(),
+                child: const Text('OK'),
+              ),
+            ],
+          ),
+        );
+        return;
+      }
 
       Provider.of<EventProvider>(context, listen: false).addEvent(
         title: _title,
@@ -68,7 +66,7 @@ class _AddEventScreenState extends State<AddEventScreen> {
         categoryId: 'default',
       );
 
-      Navigator.of(context).pop(true); 
+      Navigator.of(context).pop(true);
     }
   }
 
@@ -111,23 +109,23 @@ class _AddEventScreenState extends State<AddEventScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-            title: const Text('Add Event',style: const TextStyle(color: Colors.white)),
-            centerTitle: true,
-            backgroundColor: Color(0xFF030052),
-            elevation: 1,
-            iconTheme: const IconThemeData(color: Colors.white),
-            actions: [
-              IconButton(
-                icon: const Icon(Icons.remove_red_eye_outlined),
-                color:Colors.white,
-                onPressed: () {
-                  Navigator.of(context).push(
-                    MaterialPageRoute(builder: (_) => const TimeTableScreen()),
-                  );
-                },
-              )
-            ],
-          ),
+        title: const Text('Add Event', style: TextStyle(color: Colors.white)),
+        centerTitle: true,
+        backgroundColor: const Color(0xFF030052),
+        elevation: 1,
+        iconTheme: const IconThemeData(color: Colors.white),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.remove_red_eye_outlined),
+            color: Colors.white,
+            onPressed: () {
+              Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const TimeTableScreen()),
+              );
+            },
+          )
+        ],
+      ),
       body: Padding(
         padding: const EdgeInsets.all(16),
         child: Form(
@@ -190,11 +188,35 @@ class _AddEventScreenState extends State<AddEventScreen> {
                   ),
                 ],
               ),
+
               const SizedBox(height: 24),
+
+              Container(
+                padding: const EdgeInsets.all(12),
+                margin: const EdgeInsets.only(bottom: 16),
+                decoration: BoxDecoration(
+                  color: Colors.yellow[100],
+                  borderRadius: BorderRadius.circular(8),
+                ),
+                child: const Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(Icons.warning_amber_outlined, color: Colors.orange),
+                    SizedBox(width: 8),
+                    Expanded(
+                      child: Text(
+                        '🔋 Tip: To ensure accurate reminders, please disable Battery Optimization for this app in your device settings.',
+                        style: TextStyle(fontSize: 13),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+
               ElevatedButton(
                 onPressed: _submit,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: Color.fromARGB(255, 5, 0, 137), // Color for the button background
+                  backgroundColor: const Color.fromARGB(255, 5, 0, 137),
                 ),
                 child: const Text(
                   'Save',
