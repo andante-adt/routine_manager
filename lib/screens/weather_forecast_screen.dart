@@ -3,7 +3,7 @@ import 'package:http/http.dart' as http;
 import 'dart:convert';
 
 class WeatherForecastScreen extends StatefulWidget {
-  final String location;
+  final String? location;
   const WeatherForecastScreen({super.key, required this.location});
 
   @override
@@ -12,7 +12,7 @@ class WeatherForecastScreen extends StatefulWidget {
 
 class _WeatherForecastScreenState extends State<WeatherForecastScreen> {
   final TextEditingController _searchController = TextEditingController();
-  String _selectedLocation = 'Salaya';
+  String _selectedLocation = '';
   List<dynamic> _hourlyData = [];
   bool _isLoading = false;
   List<String> _searchResults = [];
@@ -20,8 +20,10 @@ class _WeatherForecastScreenState extends State<WeatherForecastScreen> {
   @override
   void initState() {
     super.initState();
-    _selectedLocation = widget.location;
-    _fetchHourlyForecast(_selectedLocation);
+    _selectedLocation = widget.location ?? '';
+    if (_selectedLocation.isNotEmpty) {
+      _fetchHourlyForecast(_selectedLocation);
+    }
   }
 
   Future<void> _fetchHourlyForecast(String location) async {
@@ -42,12 +44,30 @@ class _WeatherForecastScreenState extends State<WeatherForecastScreen> {
           _selectedLocation = data['location']['name'];
           _hourlyData = data['forecast']['forecastday'][0]['hour'];
         });
+      } else {
+        _showErrorDialog('Unable to fetch weather forecast.');
       }
     } catch (_) {
-      // handle error if needed
+      _showErrorDialog('Error occurred while fetching forecast.');
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _showErrorDialog(String message) {
+    showDialog(
+      context: context,
+      builder: (_) => AlertDialog(
+        title: const Text('Error'),
+        content: Text(message),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(),
+            child: const Text('OK'),
+          )
+        ],
+      ),
+    );
   }
 
   void _onSearch(String input) async {
@@ -142,53 +162,66 @@ class _WeatherForecastScreenState extends State<WeatherForecastScreen> {
 
           // 🌤 Weather Header
           Text(
-            'Weather In $_selectedLocation',
+            _selectedLocation.isNotEmpty ? 'Weather in $_selectedLocation' : 'No location selected',
             style: const TextStyle(color: Colors.white, fontSize: 20, fontWeight: FontWeight.bold),
           ),
           const SizedBox(height: 16),
 
-          // ⏰ Hourly Weather Forecast List
+          // ⏰ Hourly Forecast
           Expanded(
             child: _isLoading
                 ? const Center(child: CircularProgressIndicator())
-                : ListView.builder(
-                    padding: const EdgeInsets.symmetric(horizontal: 16),
-                    itemCount: _hourlyData.length,
-                    itemBuilder: (context, index) {
-                      final hour = _hourlyData[index];
-                      final time = hour['time'].split(' ')[1]; // HH:MM
-                      final condition = hour['condition']['text'];
-                      final icon = 'https:${hour['condition']['icon']}';
-                      final temp = '${hour['temp_c'].round()}°C';
+                : _hourlyData.isEmpty
+                    ? const Center(
+                        child: Text(
+                          'No data available.',
+                          style: TextStyle(color: Colors.white),
+                        ),
+                      )
+                    : ListView.builder(
+                        padding: const EdgeInsets.symmetric(horizontal: 16),
+                        itemCount: _hourlyData.length,
+                        itemBuilder: (context, index) {
+                          final hour = _hourlyData[index];
+                          final time = hour['time'].split(' ')[1]; // HH:MM
+                          final condition = hour['condition']['text'];
+                          final icon = 'https:${hour['condition']['icon']}';
+                          final temp = '${hour['temp_c'].round()}°C';
 
-                      return Container(
-                        margin: const EdgeInsets.only(bottom: 12),
-                        decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(16),
-                          boxShadow: const [
-                            BoxShadow(
-                              color: Colors.black12,
-                              blurRadius: 6,
-                              offset: Offset(2, 2),
+                          return Container(
+                            margin: const EdgeInsets.only(bottom: 12),
+                            decoration: BoxDecoration(
+                              color: Colors.white,
+                              borderRadius: BorderRadius.circular(16),
+                              boxShadow: const [
+                                BoxShadow(
+                                  color: Colors.black12,
+                                  blurRadius: 6,
+                                  offset: Offset(2, 2),
+                                ),
+                              ],
                             ),
-                          ],
-                        ),
-                        child: ListTile(
-                          leading: Image.network(icon, width: 40, height: 40),
-                          title: Text(
-                            time,
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                          subtitle: Text(condition),
-                          trailing: Text(
-                            temp,
-                            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                          ),
-                        ),
-                      );
-                    },
-                  ),
+                            child: ListTile(
+                              leading: Image.network(
+                                icon,
+                                width: 40,
+                                height: 40,
+                                errorBuilder: (_, __, ___) =>
+                                    const Icon(Icons.broken_image, size: 40),
+                              ),
+                              title: Text(
+                                time,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                              subtitle: Text(condition),
+                              trailing: Text(
+                                temp,
+                                style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                              ),
+                            ),
+                          );
+                        },
+                      ),
           ),
         ],
       ),
